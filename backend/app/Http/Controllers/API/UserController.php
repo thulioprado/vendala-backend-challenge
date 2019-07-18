@@ -42,13 +42,14 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'      => 'required|string|max:100',
+            'name'      => 'required|string|min:4|max:100',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required',
             'role_id'   => 'required|exists:roles,id'
         ], [
             'name.required'     => 'user.errors.nameRequired',
             'name.string'       => 'user.errors.nameInvalid',
+            'name.min'          => 'user.errors.nameShort',
             'name.max'          => 'user.errors.nameLong',
             'email.required'    => 'user.errors.emailRequired',
             'email.email'       => 'user.errors.emailInvalid',
@@ -66,12 +67,12 @@ class UserController extends Controller
 
         DB::transaction(function () use ($request, &$user) {
             $user = User::create($request->only([
-                'name', 'email', 'password', 'role_id'
-            ]));
+                            'name', 'email', 'password', 'role_id'
+                        ]));
         });
 
         if ($user) {
-            return Response::json($user);
+            return $this->show($user->id);
         }
 
         return Response::json([], 500);
@@ -110,13 +111,14 @@ class UserController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name'      => 'required|string|max:100',
+            'name'      => 'required|string|min:4|max:100',
             'email'     => 'required|email|unique:users,email,'. $user->id,
             'password'  => 'required',
             'role_id'   => 'required|exists:roles,id'
         ], [
             'name.required'     => 'user.errors.nameRequired',
             'name.string'       => 'user.errors.nameInvalid',
+            'name.min'          => 'user.errors.nameShort',
             'name.max'          => 'user.errors.nameLong',
             'email.required'    => 'user.errors.emailRequired',
             'email.email'       => 'user.errors.emailInvalid',
@@ -132,11 +134,11 @@ class UserController extends Controller
 
         DB::transaction(function () use ($request, &$user) {
             $user->update($request->only([
-                'name', 'email', 'password', 'role_id'
-            ]));
+                     'name', 'email', 'password', 'role_id'
+                 ]));
         });
 
-        return Response::json($user);
+        return $this->show($user->id);
     }
 
     /**
@@ -155,6 +157,27 @@ class UserController extends Controller
 
         DB::transaction(function () use ($user) {
             $user->delete();
+        });
+
+        return Response::json();
+    }
+
+    /**
+     * Forcibly remove the specified user from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function forceDestroy($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return Response::json([], 404);
+        }
+
+        DB::transaction(function () use ($user) {
+            $user->forceDelete();
         });
 
         return Response::json();

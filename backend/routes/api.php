@@ -37,11 +37,29 @@ Route::group(['namespace' => 'API'], function () {
         Route::get('{id}', 'UserController@show');
         Route::put('{id}', 'UserController@update');
         Route::delete('{id}', 'UserController@destroy');
+        Route::delete('{id}/force', 'UserController@forceDestroy');
+
+    });
+
+    # Categories
+    Route::group(['prefix' => 'categories', 'middleware' => 'auth:api'], function () {
+
+        Route::get('/', 'CategoryController@all');
+        Route::get('{id}', 'CategoryController@show');
+        Route::get('detail', 'CategoryController@detailed');
 
     });
 
     # Products
     Route::group(['prefix' => 'products', 'middleware' => 'auth:api'], function () {
+
+        Route::get('/', 'ProductController@all');
+        Route::get('/trashed', 'ProductController@allTrashed');
+        Route::post('/', 'ProductController@store');
+        Route::get('{id}', 'ProductController@show');
+        Route::put('{id}', 'ProductController@update');
+        Route::delete('{id}', 'ProductController@destroy');
+        Route::delete('{id}/force', 'ProductController@forceDestroy');
 
     });
 
