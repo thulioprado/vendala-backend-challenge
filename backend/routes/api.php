@@ -13,17 +13,18 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['namespace' => 'API'], function () {
+Route::group(['namespace' => 'API', 'middleware' => 'vendala.token'], function () {
 
     # Auth
     Route::group(['prefix' => 'auth'], function () {
 
         Route::post('login', 'AuthController@login');
+        Route::get('refresh', 'AuthController@refresh');
 
         Route::group(['middleware' => 'auth:api'], function () {
             Route::get('user', 'AuthController@user');
-            Route::get('refresh', 'AuthController@refresh');
             Route::get('logout', 'AuthController@logout');
+            Route::get('ping', 'AuthController@ping');
         });
 
     });
@@ -45,8 +46,8 @@ Route::group(['namespace' => 'API'], function () {
     Route::group(['prefix' => 'categories', 'middleware' => 'auth:api'], function () {
 
         Route::get('/', 'CategoryController@all');
-        Route::get('{id}', 'CategoryController@show');
         Route::get('detail', 'CategoryController@detailed');
+        Route::get('{id}', 'CategoryController@show');
 
     });
 
@@ -65,6 +66,13 @@ Route::group(['namespace' => 'API'], function () {
 
     # Kits
     Route::group(['prefix' => 'kits', 'middleware' => 'auth:api'], function () {
+
+    });
+
+    # Statistics
+    Route::group(['prefix' => 'statistics', 'middleware' => 'auth:api'], function () {
+
+        Route::get('/', 'StatisticController@get');
 
     });
 

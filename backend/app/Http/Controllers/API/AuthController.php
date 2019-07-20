@@ -21,9 +21,9 @@ class AuthController extends Controller
             'email'    => 'required|email',
             'password' => 'required'
         ], [
-            'email.required'    => 'login.errors.emailRequired',
-            'email.email'       => 'login.errors.emailInvalid',
-            'password.required' => 'login.errors.passwordRequired'
+            'email.required'    => 'O seu e-mail é necessário, mano.',
+            'email.email'       => 'Coloca um e-mail válido aí, meu parça.',
+            'password.required' => 'Pow brow. Qual é a senha?'
         ]);
 
         if ($validator->fails()) {
@@ -33,7 +33,10 @@ class AuthController extends Controller
         $token = Auth::attempt($request->only(['email', 'password']));
 
         if (!$token) {
-            return Response::json([], 401);
+            $validator->errors()->add('email', 'Vish cara, não rolou! Isso aqui tá certo?');
+            $validator->errors()->add('password', 'Dá uma olhada nessa parada aqui também.');
+
+            return Response::json(['errors' => $validator->errors()], 401);
         }
 
         return $this->respondWithToken($token);
@@ -72,6 +75,16 @@ class AuthController extends Controller
     }
 
     /**
+     * Ping pong
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function ping()
+    {
+        return Response::json('pong');
+    }
+
+    /**
      * Get the token array structure.
      *
      * @param  string $token
@@ -82,9 +95,8 @@ class AuthController extends Controller
         return Response::json([
             'token'      => $token,
             'type'       => 'bearer',
-            'expires_in' => Auth::factory()
-                                ->getTTL() * 60,
-            'user'       => Auth::user()
+            'expires_at' => Auth::factory()
+                                ->getTTL() * 60
         ]);
     }
 }

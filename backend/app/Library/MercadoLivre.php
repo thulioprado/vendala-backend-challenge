@@ -71,8 +71,7 @@ class MercadoLivre
         $final = [];
 
         foreach ($categories as $category) {
-            $children = [];
-            $detail   = self::category($category->id);
+            $detail = self::category($category->id);
 
             if ($detail === false) {
                 continue;
