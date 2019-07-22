@@ -8,16 +8,16 @@ import { toast } from '../components/Alert';
 
 class Navbart extends React.Component {
   handleSignOut = async () => {
+    if (isAuth()) {
+      await api.get('/auth/logout');
+    }
+
     toast({
       type: 'success',
       title: 'Desconectado.'
     });
 
-    if (isAuth()) {
-      await api.get('/auth/logout');
-    }
-
-    logout();    
+    logout();
     this.props.history.push('/home');
   }
 

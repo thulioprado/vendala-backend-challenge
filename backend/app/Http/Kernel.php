@@ -38,9 +38,9 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            'cors',
             'throttle:60,1',
             'bindings',
-            'cors',
         ],
     ];
 

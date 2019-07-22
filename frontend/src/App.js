@@ -1,7 +1,7 @@
 import React from 'react';
 import LoadingScreen from 'react-loading-screen';
 import Routes from './routes';
-import { isAuth, login, logout } from './services/auth';
+import { isAuth } from './services/auth';
 import api from './services/api';
 import './App.css';
 
@@ -12,26 +12,6 @@ export default class App extends React.Component {
     this.state = {
       loading: true
     };
-  }
-
-  refresh = () => {
-    api.get('/auth/refresh')
-       .then((response) => {
-         const { data } = response;
-
-         login(data.token);
-
-         this.setState({ 
-           loading: false
-         });
-       })
-       .catch((error) => {
-         logout();
-
-         this.setState({ 
-           loading: false
-         });
-       });
   }
 
   componentDidMount() {
@@ -48,13 +28,10 @@ export default class App extends React.Component {
       // Verifica se é uma sessão válida
       // Caso não seja, atualiza a sessão
       api.get('/auth/ping')
-         .then((response) => {
+         .then(() => {
            this.setState({ 
              loading: false
            });
-         })
-         .catch((error) => {
-           this.refresh();
          });
     } else {
       setTimeout(() => this.setState({ 
@@ -74,7 +51,7 @@ export default class App extends React.Component {
         logoSrc={require('./assets/logo.png')}
         textColor="#606060"
         text=""
-      >
+        >
         <Routes />
       </LoadingScreen>
     );

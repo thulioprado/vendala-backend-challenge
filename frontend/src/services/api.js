@@ -1,15 +1,16 @@
 import axios from 'axios';
 import { loadProgressBar } from 'axios-progress-bar';
-import { getToken, login } from './auth';
+import { isAuth, getToken, login } from './auth';
 import 'axios-progress-bar/dist/nprogress.css';
+import config from '../config.js';
 
 let refreshToken     = false;
 let refreshCallbacks = [];
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: config.API_URL,
   headers: {
-    'Vendala-Token': '$2y$10$PS6DX/hhjArL7KodDVy5QOMDb.Op99p2Vh.6CVlWlWSSv2OJmYE2q'
+    'Vendala-Token': config.VENDALA_TOKEN
   }
 });
 
@@ -26,38 +27,39 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use((response) => {
   return response;
 }, (error) => {  
-  console.log(error);
-  const { config, response: { status } } = error;
-  const requestConfig                    = config;
+  if (error.response !== undefined) {
+    const { config, response: { status } } = error;
+    const requestConfig                    = config;
 
-  if (status === 401) {
-    if (!refreshToken) {
-      refreshToken = true;
+    if ((status === 498 || status === 401) && isAuth()) {
+      if (!refreshToken) {
+        refreshToken = true;
 
-      api.get('/auth/refresh')
-         .then((response) => {
-           const { data } = response;
+        api.get('/auth/refresh')
+          .then((response) => {
+            const { data } = response;
 
-           login(data.token);
+            login(data.token);
 
-           refreshCallbacks.map((callback) => callback(data.token));
-           
-           refreshToken     = false;
-           refreshCallbacks = [];
-         });
-    }
+            refreshCallbacks.map((callback) => callback(data.token));
+            
+            refreshToken     = false;
+            refreshCallbacks = [];
+          });
+      }
 
-    const request = new Promise((resolve, reject) => {
-      refreshCallbacks.push((token) => {
-        requestConfig.headers['Authorization'] = 'Bearer ' + token;
-        resolve(axios(requestConfig));
+      const request = new Promise((resolve, reject) => {
+        refreshCallbacks.push((token) => {
+          requestConfig.headers['Authorization'] = 'Bearer ' + token;
+          resolve(axios(requestConfig));
+        });
       });
-    });
 
-    return request;
-  } else {
-    return Promise.reject(error);
+      return request;
+    }
   }
+
+  return Promise.reject(error);
 });
 
 loadProgressBar({

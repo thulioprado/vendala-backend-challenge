@@ -7,7 +7,7 @@ export default class Edit extends React.Component {
       <Container className="mt-5 mb-5">
         <Alert variant="warning" className="text-center p-5">
           <p><i className="far fa-sad-cry fa-3x"></i></p>
-          <p>Desculpe.<br />Não deu tempo de fazer esta tela. </p>          
+          <p>Desculpe.<br />Não deu tempo de fazer esta tela.</p>          
         </Alert>
         <div className="w-100 text-center">
           <Button onClick={() => this.props.history.goBack()} variant="outline-dark">
