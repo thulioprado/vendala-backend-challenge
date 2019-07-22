@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import api from '../services/api';
 import { login } from '../services/auth';
+import { toast } from '../components/Alert';
 
 export default class Login extends React.Component {
   constructor(props) {
@@ -27,8 +28,8 @@ export default class Login extends React.Component {
     e.preventDefault();
 
     const errors = {
-      email: '',
-      password: ''
+      email: null,
+      password: null
     };
 
     this.setState({
@@ -36,15 +37,7 @@ export default class Login extends React.Component {
     });
     
     const { email, password } = this.state;
-
-    if (!email) {
-      errors.email = 'O seu e-mail é necessário, mano.';
-    }
-
-    if (!password) {
-      errors.password = 'Pow brow. Qual é a senha?';
-    }
-
+    
     if (email && password) {
       api.post('/auth/login', { email, password })
          .then((response) => {
@@ -53,6 +46,11 @@ export default class Login extends React.Component {
            login(data.token);
   
            this.props.history.push('/home');
+
+           toast({
+             type: 'success',
+             title: 'Conectado.'
+           });
          })
          .catch((error) => {
            try {
@@ -64,9 +62,16 @@ export default class Login extends React.Component {
                        errors[key] = value[0];
                      }
                    });
+
+             toast({
+               type: 'error',
+               title: 'As credenciais informadas não correspondem aos nossos registros.',
+             });
            } catch (e) {
-             errors.email    = 'Deu muita merda, parceiro!';
-             errors.password = 'Corre que o bicho tá pegando.';
+             toast({
+               type: 'error',
+               title: 'Não foi possível efetuar o login. Tente novamente.',
+             });
 
              console.error(error);
            }
@@ -110,7 +115,8 @@ export default class Login extends React.Component {
                       value={this.state.email}
                       isInvalid={!!this.state.errors.email} 
                       onChange={this.handleChange}
-                      autoFocus={true}
+                      autoFocus
+                      required
                     />
                     <Form.Label htmlFor="email">E-mail</Form.Label>
                     <Form.Control.Feedback type="invalid">
@@ -126,6 +132,7 @@ export default class Login extends React.Component {
                       value={this.state.password}
                       isInvalid={!!this.state.errors.password} 
                       onChange={this.handleChange}
+                      required
                     />
                     <Form.Label htmlFor="password">Senha</Form.Label>
                     <Form.Control.Feedback type="invalid">

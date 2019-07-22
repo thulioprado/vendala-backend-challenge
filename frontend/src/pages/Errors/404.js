@@ -12,13 +12,15 @@ export default class Error404 extends React.Component {
                 <span className="error-code">404</span>
               </Col>
               <Col xs={6} className="text-left">
-                <p className="error-title mt-2">Putz!</p>
-                <p className="error-description mt-1">Deu ruim.</p>
+                <p className="error-title mt-2">Erro!</p>
+                <p className="error-description mt-1">Página não encontrada.</p>
               </Col>
             </Row>
             <Row>
               <Col className="text-center">
-                <Button onClick={() => this.props.history.goBack()} variant="outline-dark">Clique aqui para voltar</Button>
+                <Button onClick={() => this.props.history.goBack()} variant="outline-dark">
+                  <i className="fas fa-arrow-left fa-sm mr-1"></i> Voltar
+                </Button>
               </Col>
             </Row>
           </Col>

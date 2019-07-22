@@ -72,7 +72,7 @@ export default class App extends React.Component {
         bgColor="#f4f4f4"
         spinnerColor="#36b6ff"
         logoSrc={require('./assets/logo.png')}
-        textColor="#676767"
+        textColor="#606060"
         text=""
       >
         <Routes />

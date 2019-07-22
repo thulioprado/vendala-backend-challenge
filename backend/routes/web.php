@@ -11,6 +11,11 @@
 |
 */
 
-Route::any('{page?}', function () {
+Route::get('images/{folder}/{file}', function ($folder, $file) {
+    return Image::make(storage_path("app/{$folder}/{$file}"))
+                ->response();
+})->name('image');
+
+Route::get('/', function () {
     return view('index');
-})->where('page', '.*');
+});

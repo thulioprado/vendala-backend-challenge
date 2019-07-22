@@ -20,8 +20,7 @@ export default class Home extends React.Component {
 
          this.setState({
            users: data.users,
-           products: data.products,
-           kits: data.kits
+           products: data.products
          });
        });
   }
@@ -46,16 +45,6 @@ export default class Home extends React.Component {
             <p>
               Com <strong>{this.state.products}</strong> produtos registrados.<br />
               <i>*Olokinho meu!*</i>
-            </p>
-          </Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item>
-          <Image className="d-block w-100 h-100" src={require('../assets/kits-carousel.jpg')} alt="Kits" />
-          <Carousel.Caption>
-            <h3>Kits</h3>
-            <p>
-              E <strong>{this.state.kits}</strong> combinações de produtos.<br />
-              <i>#combinei #populei #ahazei</i>
             </p>
           </Carousel.Caption>
         </Carousel.Item>

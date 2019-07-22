@@ -46,7 +46,6 @@ Route::group(['namespace' => 'API', 'middleware' => 'vendala.token'], function (
     Route::group(['prefix' => 'categories', 'middleware' => 'auth:api'], function () {
 
         Route::get('/', 'CategoryController@all');
-        Route::get('detail', 'CategoryController@detailed');
         Route::get('{id}', 'CategoryController@show');
 
     });
@@ -61,11 +60,6 @@ Route::group(['namespace' => 'API', 'middleware' => 'vendala.token'], function (
         Route::put('{id}', 'ProductController@update');
         Route::delete('{id}', 'ProductController@destroy');
         Route::delete('{id}/force', 'ProductController@forceDestroy');
-
-    });
-
-    # Kits
-    Route::group(['prefix' => 'kits', 'middleware' => 'auth:api'], function () {
 
     });
 

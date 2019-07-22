@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
+use Hash;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -21,9 +23,9 @@ class AuthController extends Controller
             'email'    => 'required|email',
             'password' => 'required'
         ], [
-            'email.required'    => 'O seu e-mail é necessário, mano.',
-            'email.email'       => 'Coloca um e-mail válido aí, meu parça.',
-            'password.required' => 'Pow brow. Qual é a senha?'
+            'email.required'    => 'Insira o seu e-mail.',
+            'email.email'       => 'E-mail inválido.',
+            'password.required' => 'Insira a sua senha.'
         ]);
 
         if ($validator->fails()) {
@@ -33,8 +35,8 @@ class AuthController extends Controller
         $token = Auth::attempt($request->only(['email', 'password']));
 
         if (!$token) {
-            $validator->errors()->add('email', 'Vish cara, não rolou! Isso aqui tá certo?');
-            $validator->errors()->add('password', 'Dá uma olhada nessa parada aqui também.');
+            $validator->errors()->add('email', 'Por favor, verifique o seu e-mail.');
+            $validator->errors()->add('password', 'Por favor, verifique a sua senha.');
 
             return Response::json(['errors' => $validator->errors()], 401);
         }
@@ -96,7 +98,8 @@ class AuthController extends Controller
             'token'      => $token,
             'type'       => 'bearer',
             'expires_at' => Auth::factory()
-                                ->getTTL() * 60
+                                ->getTTL() * 60,
+            'user'       => Auth::user()
         ]);
     }
 }

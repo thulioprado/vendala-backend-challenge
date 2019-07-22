@@ -20,7 +20,7 @@ class ProductController extends Controller
      */
     public function all()
     {
-        $products = Product::with('images')
+        $products = Product::with(['items.product.images', 'images'])
                            ->get();
         return Response::json($products);
     }
@@ -33,7 +33,7 @@ class ProductController extends Controller
     public function allTrashed()
     {
         $products = Product::onlyTrashed()
-                           ->with('images')
+                           ->with(['items.product.images', 'images'])
                            ->get();
         return Response::json($products);
     }
@@ -53,17 +53,17 @@ class ProductController extends Controller
             'price'         => ['required', 'regex:/^(?=.+)(?:[1-9]\d*|0)?(?:\.\d+)?$/'],
             'images.*'      => 'nullable|image'
         ], [
-            'name.required'         => 'product.errors.nameRequired',
-            'name.string'           => 'product.errors.nameInvalid',
-            'name.max'              => 'product.errors.nameShort',
-            'name.max'              => 'product.errors.nameLong',
-            'category.required'     => 'product.errors.categoryRequired',
-            'category.string'       => 'product.errors.categoryInvalid',
-            'description.string'    => 'product.errors.descriptionInvalid',
-            'description.max'       => 'product.errors.descriptionLong',
-            'price.required'        => 'product.errors.priceRequired',
-            'price.regex'           => 'product.errors.priceInvalid',
-            'images.*.image'        => 'product.errors.imageInvalid'
+            'name.required'         => 'Insira o nome.',
+            'name.string'           => 'Nome inválido',
+            'name.max'              => 'Nome curto demais. Tente um nome maior.',
+            'name.max'              => 'Nome longo demais. Tente um nome menor.',
+            'category.required'     => 'Selecione a categoria final.',
+            'category.string'       => 'Categoria inválida.',
+            'description.string'    => 'Descrição inválida.',
+            'description.max'       => 'Descrição longa demais. Tente uma descrição menor.',
+            'price.required'        => 'Insira o preço.',
+            'price.regex'           => 'Preço inválido.',
+            'images.*.image'        => 'Imagem inválida.'
         ]);
 
         if ($validator->fails()) {
@@ -73,37 +73,61 @@ class ProductController extends Controller
         $category = MercadoLivre::category($request->category);
 
         if ($category === false) {
-            $validator->errors()->add('category', 'product.errors.categoryInvalid');
+            $validator->errors()->add('category', 'Categoria inválida.');
             return Response::json(['errors' => $validator->errors()], 422);
+        }
+
+        $items = [];
+
+        if ($request->has('items')) {
+            $itemsIds = [];
+
+            foreach ($request->items as $item => $amount) {
+                $itemsIds[] = $item;
+                $items[]    = [
+                    'item_id' => $item,
+                    'amount'  => $amount
+                ];
+            }
+
+            if (Product::whereIn('id', $itemsIds)->count() != count($itemsIds)) {
+                $validator->errors()->add('items', 'Produto inválido adicionado no kit. Por favor, verifique.');
+                return Response::json(['errors' => $validator->errors()], 422);
+            }
         }
 
         $images = [];
 
         if ($request->hasFile('images')) {
-            foreach ($request->images as $key => $image) {
+            foreach ($request->images as $image) {
                 $path = $image->store('products');
 
                 if ($path === false) {
-                    $validator->errors()->add("images.{$key}", 'product.errors.imageUpload');
+                    $validator->errors()->add('images', 'Falha no upload de imagens.');
                     return Response::json(['errors' => $validator->errors()], 422);
                 }
 
-                $images[] = $path;
+                $images[] = [
+                    'path' => $path
+                ];
             }
         }
 
         $product = null;
 
-        DB::transaction(function () use ($request, &$product, $images) {
+        DB::transaction(function () use ($request, &$product, $images, $items) {
             $product = Product::create($request->only([
                                   'name', 'category', 'description', 'price'
                               ]));
 
-            foreach ($images as $image) {
+            if ($images !== []) {
                 $product->images()
-                        ->create([
-                            'path' => $image
-                        ]);
+                        ->createMany($images);
+            }
+
+            if ($items !== []) {
+                $product->items()
+                        ->createMany($items);
             }
         });
 
@@ -122,7 +146,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with('images')
+        $product = Product::with(['items.product.images', 'images'])
                           ->find($id);
 
         if (!$product) {
@@ -154,17 +178,17 @@ class ProductController extends Controller
             'price'         => ['required', 'regex:/^(?=.+)(?:[1-9]\d*|0)?(?:\.\d+)?$/'],
             'images.*'      => 'nullable|image'
         ], [
-            'name.required'         => 'product.errors.nameRequired',
-            'name.string'           => 'product.errors.nameInvalid',
-            'name.max'              => 'product.errors.nameShort',
-            'name.max'              => 'product.errors.nameLong',
-            'category.required'     => 'product.errors.categoryRequired',
-            'category.string'       => 'product.errors.categoryInvalid',
-            'description.string'    => 'product.errors.descriptionInvalid',
-            'description.max'       => 'product.errors.descriptionLong',
-            'price.required'        => 'product.errors.priceRequired',
-            'price.regex'           => 'product.errors.priceInvalid',
-            'images.*.image'        => 'product.errors.imageInvalid'
+            'name.required'         => 'Insira o nome.',
+            'name.string'           => 'Nome inválido',
+            'name.max'              => 'Nome curto demais. Tente um nome maior.',
+            'name.max'              => 'Nome longo demais. Tente um nome menor.',
+            'category.required'     => 'Selecione a categoria final.',
+            'category.string'       => 'Categoria inválida.',
+            'description.string'    => 'Descrição inválida.',
+            'description.max'       => 'Descrição longa demais. Tente uma descrição menor.',
+            'price.required'        => 'Insira o preço.',
+            'price.regex'           => 'Preço inválido.',
+            'images.*.image'        => 'Imagem inválida.'
         ]);
 
         if ($validator->fails()) {
@@ -174,8 +198,27 @@ class ProductController extends Controller
         $category = MercadoLivre::category($request->category);
 
         if ($category === false) {
-            $validator->errors()->add('category', 'product.errors.categoryInvalid');
+            $validator->errors()->add('category', 'Categoria inválida.');
             return Response::json(['errors' => $validator->errors()], 422);
+        }
+
+        $items = [];
+
+        if ($request->has('items')) {
+            $itemsIds = [];
+
+            foreach ($request->items as $item => $amount) {
+                $itemsIds[] = $item;
+                $items[]    = [
+                    'item_id' => $item,
+                    'amount'  => $amount
+                ];
+            }
+
+            if (Product::whereIn('id', $itemsIds)->count() != count($itemsIds)) {
+                $validator->errors()->add('items', 'Produto inválido adicionado no kit. Por favor, verifique.');
+                return Response::json(['errors' => $validator->errors()], 422);
+            }
         }
 
         $images = [];
@@ -185,15 +228,17 @@ class ProductController extends Controller
                 $path = $image->store('products');
 
                 if ($path === false) {
-                    $validator->errors()->add("images.{$key}", 'product.errors.imageUpload');
+                    $validator->errors()->add('images', 'Falha no upload de imagens.');
                     return Response::json(['errors' => $validator->errors()], 422);
                 }
 
-                $images[] = $path;
+                $images[] = [
+                    'path' => $path
+                ];
             }
         }
 
-        DB::transaction(function () use ($request, &$product, $images) {
+        DB::transaction(function () use ($request, &$product, $images, $items) {
             $product->update($request->only([
                         'name', 'category', 'description', 'price'
                     ]));
@@ -208,12 +253,16 @@ class ProductController extends Controller
                 $product->images()
                         ->delete();
 
-                foreach ($images as $image) {
-                    $product->images()
-                            ->create([
-                                'path' => $image
-                            ]);
-                }
+                $product->images()
+                        ->createMany($images);
+            }
+
+            if ($items !== []) {
+                $product->items()
+                        ->delete();
+
+                $product->items()
+                        ->createMany($items);
             }
         });
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateKitProductsTable extends Migration
+class CreateProductItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,20 @@ class CreateKitProductsTable extends Migration
      */
     public function up()
     {
-        Schema::create('kit_products', function (Blueprint $table) {
+        Schema::create('product_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('kit_id');
-            $table->foreign('kit_id')
-                  ->references('id')
-                  ->on('kits')
-                  ->onDelete('cascade');
             $table->unsignedBigInteger('product_id');
             $table->foreign('product_id')
                   ->references('id')
                   ->on('products')
                   ->onDelete('cascade');
+            $table->unsignedBigInteger('item_id');
+            $table->foreign('item_id')
+                  ->references('id')
+                  ->on('products')
+                  ->onDelete('cascade');
+            $table->integer('amount')
+                  ->default(1);
         });
     }
 

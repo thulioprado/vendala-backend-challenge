@@ -26,22 +26,6 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display a listing of categories in detail.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function detailed()
-    {
-        $categories = MercadoLivre::detailedCategories();
-
-        if ($categories === false) {
-            return Response::json([], 500);
-        }
-
-        return Response::json($categories);
-    }
-
-    /**
      * Display the specified category.
      *
      * @param  string  $id

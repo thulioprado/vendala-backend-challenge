@@ -16,9 +16,16 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function all()
+    public function all(Request $request)
     {
-        $users = User::all();
+        $users = [];
+
+        if ($request->has('paginate')) {
+            $users = User::paginate($request->paginate);
+        } else {
+            $users = User::all();
+        }
+
         return Response::json($users);
     }
 
@@ -44,19 +51,16 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name'      => 'required|string|min:4|max:100',
             'email'     => 'required|email|unique:users,email',
-            'password'  => 'required',
-            'role_id'   => 'required|exists:roles,id'
+            'password'  => 'required'
         ], [
-            'name.required'     => 'user.errors.nameRequired',
-            'name.string'       => 'user.errors.nameInvalid',
-            'name.min'          => 'user.errors.nameShort',
-            'name.max'          => 'user.errors.nameLong',
-            'email.required'    => 'user.errors.emailRequired',
-            'email.email'       => 'user.errors.emailInvalid',
-            'email.unique'      => 'user.errors.emailUnique',
-            'password.required' => 'user.errors.passwordRequired',
-            'role_id.required'  => 'user.errors.roleRequired',
-            'role_id.exists'    => 'user.errors.roleInvalid'
+            'name.required'     => 'Insira o nome.',
+            'name.string'       => 'Nome inválido.',
+            'name.min'          => 'Nome curto demais. Tente um nome maior.',
+            'name.max'          => 'Nome longo demais. Tente um nome menor.',
+            'email.required'    => 'Insira o e-mail.',
+            'email.email'       => 'E-mail inválido.',
+            'email.unique'      => 'E-mail em uso.',
+            'password.required' => 'Insira a senha.'
         ]);
 
         if ($validator->fails()) {
@@ -67,7 +71,7 @@ class UserController extends Controller
 
         DB::transaction(function () use ($request, &$user) {
             $user = User::create($request->only([
-                            'name', 'email', 'password', 'role_id'
+                            'name', 'email', 'password'
                         ]));
         });
 
@@ -112,30 +116,31 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name'      => 'required|string|min:4|max:100',
-            'email'     => 'required|email|unique:users,email,'. $user->id,
-            'password'  => 'required',
-            'role_id'   => 'required|exists:roles,id'
+            'email'     => 'required|email|unique:users,email,'. $user->id
         ], [
-            'name.required'     => 'user.errors.nameRequired',
-            'name.string'       => 'user.errors.nameInvalid',
-            'name.min'          => 'user.errors.nameShort',
-            'name.max'          => 'user.errors.nameLong',
-            'email.required'    => 'user.errors.emailRequired',
-            'email.email'       => 'user.errors.emailInvalid',
-            'email.unique'      => 'user.errors.emailUnique',
-            'password.required' => 'user.errors.passwordRequired',
-            'role_id.required'  => 'user.errors.roleRequired',
-            'role_id.exists'    => 'user.errors.roleInvalid'
+            'name.required'     => 'Insira o nome.',
+            'name.string'       => 'Nome inválido.',
+            'name.min'          => 'Nome curto demais. Tente um nome maior.',
+            'name.max'          => 'Nome longo demais. Tente um nome menor.',
+            'email.required'    => 'Insira o e-mail.',
+            'email.email'       => 'E-mail inválido.',
+            'email.unique'      => 'E-mail em uso.'
         ]);
 
         if ($validator->fails()) {
             return Response::json(['errors' => $validator->errors()], 422);
         }
 
-        DB::transaction(function () use ($request, &$user) {
-            $user->update($request->only([
-                     'name', 'email', 'password', 'role_id'
-                 ]));
+        $data = $request->only([
+            'name', 'email', 'password'
+        ]);
+
+        if ($data['password'] === null) {
+            unset($data['password']);
+        }
+
+        DB::transaction(function () use ($data, &$user) {
+            $user->update($data);
         });
 
         return $this->show($user->id);

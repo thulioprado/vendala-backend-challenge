@@ -1,14 +1,20 @@
 import React from 'react';
-import { Navbar, Nav, Image, Container, Button } from 'react-bootstrap';
+import { Navbar, Nav, Image, Container } from 'react-bootstrap';
 import { Link, NavLink } from 'react-router-dom';
 import { isAuth, logout } from '../services/auth';
 import api from '../services/api';
 import { withRouter } from 'react-router-dom';
+import { toast } from '../components/Alert';
 
 class Navbart extends React.Component {
-  handleSignOut = () => {
+  handleSignOut = async () => {
+    toast({
+      type: 'success',
+      title: 'Desconectado.'
+    });
+
     if (isAuth()) {
-      api.get('/auth/logout');
+      await api.get('/auth/logout');
     }
 
     logout();    
@@ -17,20 +23,23 @@ class Navbart extends React.Component {
 
   render() {
     return (
-      <Navbar bg="light" expand="md" className="shadow-sm">
+      <Navbar bg="white" expand="md" className="shadow-sm">
         <Container>
-          <Navbar.Brand>
+          <Navbar.Brand className="abs">
             <Link to="/">
               <Image src={require('../assets/logo.png')} height="60"/>
             </Link>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbar" />
           <Navbar.Collapse id="navbar">
-            <Nav className="ml-auto">          
-              <Nav.Link as={NavLink} to="/users" activeClassName="active">Usuários</Nav.Link>
-              <Nav.Link as={NavLink} to="/products" activeClassName="active">Produtos</Nav.Link>
-              <Nav.Link as={NavLink} to="/kits" activeClassName="active">Kits</Nav.Link>
-              <Nav.Link as={Button} onClick={this.handleSignOut} variant="danger" className="w-sm-50">Sair</Nav.Link>
+            <Nav className="text-center font-weight-bold">          
+              <Nav.Link as={NavLink} to="/users" activeClassName="active" className="mr-md-3">Usuários</Nav.Link>
+              <Nav.Link as={NavLink} to="/products" activeClassName="active" className="mr-md-3">Produtos</Nav.Link>
+            </Nav>
+            <Nav className="ml-auto text-center">
+              <Nav.Link onClick={this.handleSignOut} className="text-danger nav-button">
+                <i className="fas fa-power-off"></i>
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
