@@ -9,7 +9,7 @@
   - **php artisan storage:link**
   - **php artisan jwt:secret**
 - Para servir a aplicação, executar:
- - **php artisan serve**
+  - **php artisan serve**
 
 #### Front-end
 -  Configurar **API_URL** e **VENDALA_TOKEN** no arquivo **src/config.js**
