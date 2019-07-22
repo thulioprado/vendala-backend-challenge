@@ -20,5 +20,5 @@
 
 ## Credênciais
 
-**E-mail:** vendala@vendala.com.br
+**E-mail:** vendala@vendala.com.br<br>
 **Senha:** vendala
