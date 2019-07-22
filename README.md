@@ -7,6 +7,7 @@
 - Executar os comandos:
   - **php artisan migrate --seed**
   - **php artisan storage:link**
+  - **php artisan jwt:secret**
 - Para servir a aplicação, executar:
  - **php artisan serve**
 
